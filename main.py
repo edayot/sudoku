@@ -13,6 +13,19 @@ M=[
     [0,7,4,0,0,0,6,0,1]
 ]
 
+def start(n):
+    print(verify(M))
+    G=first_fill_matrice(M)
+    
+    G=first_refresh_notes(G)
+    for i in range(n):
+        G,c=step_resolve(G)
+        if not c:
+            return display(G),i
+    return display(G),n
+    
+    
+
 def verify(M):
     complete=True
     duplicates_lines=False
@@ -46,7 +59,7 @@ def first_fill_matrice(M):
                 G[i][j]=[G[i][j],[]]
     return G
 
-def refresh_notes(G):
+def first_refresh_notes(G):
     for i in range(0,9):
         for j in range(0,9):
             #for each notes
@@ -82,10 +95,25 @@ def step_resolve(G):
                 #the only one note in a case
                 if len(G[i][j][1])==1:
                     G[i][j]=G[i][j][1][0],[]
+                    for case in affected_case(i,j):
+                        try:
+                            G[case[0]][case[1]][1].remove(G[i][j][1])
+                        except:
+                            pass
+                    return G,True
+                        
                 #the only one note of a number in a case
                 c=case_solve(G,i,j)
                 if c!=0:
-                    G[i][j]=c,[]
+                    G[i][j]=[c,[]]
+                    for case in affected_case(i,j):
+                        try:
+                            G[case[0]][case[1]][1].remove(G[i][j][1])
+                        except:
+                            pass
+                    return G,True
+    return G,False
+    
             
 
 def case_solve(G,i,j):
@@ -97,3 +125,24 @@ def case_solve(G,i,j):
                     return 0
         return G[i][j][1][k]
 
+def affected_case(i,j):
+    L=[]
+    for k in range(0,9):
+        if not [k,j] in L:
+            L.append([k,j])
+        if not [i,k] in L:
+            L.append([i,k])
+    for a in range(0,3):
+        for b in range(0,3):
+            if not [i//3+a,j//3+b] in L:
+                L.append([i//3+a,j//3+b])
+    return L
+
+def display(G):
+    M=[]
+    for i in range(0,9):
+        l=[]
+        for j in range(0,9):
+            l.append(G[i][j][0])
+        M.append(l)
+    return M
